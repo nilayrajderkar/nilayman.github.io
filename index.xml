@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nilay Writes</title>
+    <link>https://nilayman.github.io/</link>
+    <description>Recent content on Nilay Writes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>© Athul</copyright>
+    <atom:link href="https://nilayman.github.io/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>
