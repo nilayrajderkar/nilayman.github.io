@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Nilay Writes</title>
+    <title>Nilay Rajderkar</title>
     <link>https://nilayrajderkar.github.io/</link>
-    <description>Recent content on Nilay Writes</description>
+    <description>Recent content on Nilay Rajderkar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <copyright>© Athul</copyright>
     <atom:link href="https://nilayrajderkar.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>About Me</title>
+      <link>https://nilayrajderkar.github.io/about/</link>
+      <pubDate>Sun, 10 Dec 2023 00:00:00 +0000</pubDate>
+      <guid>https://nilayrajderkar.github.io/about/</guid>
+      <description>I currently work at Sundial as a Data Engineer. I learn and write about large scale data handling and storage. Previously interned at PayPal, Indeed and Gameskraft.</description>
+    </item>
   </channel>
 </rss>
