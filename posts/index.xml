@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Nilay Rajderkar</title>
-    <link>https://nilayrajderkar.github.io/</link>
-    <description>Recent content on Nilay Rajderkar</description>
+    <title>Posts on Nilay Rajderkar</title>
+    <link>https://nilayrajderkar.github.io/posts/</link>
+    <description>Recent content in Posts on Nilay Rajderkar</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 31 Dec 2023 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://nilayrajderkar.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://nilayrajderkar.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>SQL Window Functions (Basics)</title>
       <link>https://nilayrajderkar.github.io/posts/sqlwindowfunctions/</link>
@@ -16,13 +16,6 @@
       <description>Understanding how SQL Window Functions Work
 Window functions are also aggregation functions For group by aggregation - one row is returned per group with overall aggregation on the entire group. However for window function - each row is returned back, and individual row information is used in the aggregation. OVER() is used to define a window - the 3 operations below are encapsulated in this OVER() clause
 Three Important operations -</description>
-    </item>
-    <item>
-      <title>About Me</title>
-      <link>https://nilayrajderkar.github.io/about/</link>
-      <pubDate>Sun, 10 Dec 2023 00:00:00 +0000</pubDate>
-      <guid>https://nilayrajderkar.github.io/about/</guid>
-      <description>I currently work at Sundial as a Data Engineer. I learn and write about large scale data handling and storage. Previously interned at PayPal, Indeed and Gameskraft.</description>
     </item>
   </channel>
 </rss>

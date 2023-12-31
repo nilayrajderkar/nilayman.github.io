@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html><head lang="en">
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>SQL Window Functions (Basics) - Nilay Rajderkar</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Understanding how SQL Window Functions Work
+Window functions are also aggregation functions For group by aggregation - one row is returned per group with overall aggregation on the entire group. However for window function - each row is returned back, and individual row information is used in the aggregation. OVER() is used to define a window - the 3 operations below are encapsulated in this OVER() clause
+Three Important operations -" />
+	<meta property="og:image" content=""/>
+	<meta property="og:title" content="SQL Window Functions (Basics)" />
+<meta property="og:description" content="Understanding how SQL Window Functions Work
+Window functions are also aggregation functions For group by aggregation - one row is returned per group with overall aggregation on the entire group. However for window function - each row is returned back, and individual row information is used in the aggregation. OVER() is used to define a window - the 3 operations below are encapsulated in this OVER() clause
+Three Important operations -" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://nilayrajderkar.github.io/posts/sqlwindowfunctions/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-12-31T00:00:00+00:00" />
+<meta property="article:modified_time" content="2023-12-31T00:00:00+00:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="SQL Window Functions (Basics)"/>
+<meta name="twitter:description" content="Understanding how SQL Window Functions Work
+Window functions are also aggregation functions For group by aggregation - one row is returned per group with overall aggregation on the entire group. However for window function - each row is returned back, and individual row information is used in the aggregation. OVER() is used to define a window - the 3 operations below are encapsulated in this OVER() clause
+Three Important operations -"/>
+<script src="https://nilayrajderkar.github.io/js/feather.min.js"></script>
+	
+	
+        <link href="https://nilayrajderkar.github.io/css/fonts.2c2227b81b1970a03e760aa2e6121cd01f87c88586803cbb282aa224720a765f.css" rel="stylesheet">
+	
+
+	
+	<link rel="stylesheet" type="text/css" media="screen" href="https://nilayrajderkar.github.io/css/main.ac08a4c9714baa859217f92f051deb58df2938ec352b506df655005dcaf98cc0.css" />
+		<link id="darkModeStyle" rel="stylesheet" type="text/css" href="https://nilayrajderkar.github.io/css/dark.726cd11ca6eb7c4f7d48eb420354f814e5c1b94281aaf8fd0511c1319f7f78a4.css"  disabled />
+	
+
+	
+	
+		<script type="text/javascript"
+		src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+		</script>
+	
+		
+		<script type="text/x-mathjax-config">
+		MathJax.Hub.Config({
+			tex2jax: {
+				inlineMath: [['$','$'], ['\\(','\\)']],
+				displayMath: [['$$','$$'], ['\[','\]']],
+				processEscapes: true,
+				processEnvironments: true,
+				skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+				TeX: { equationNumbers: { autoNumber: "AMS" },
+						 extensions: ["AMSmath.js", "AMSsymbols.js"] }
+			}
+		});
+		</script>
+	
+
+	
+	
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css">
+		<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.js"></script>
+		<script defer src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+		
+		
+		<script>
+			document.addEventListener("DOMContentLoaded", function() {
+					renderMathInElement(document.body, {
+							delimiters: [
+									{left: "$$", right: "$$", display: true},
+									{left: "$", right: "$", display: false}
+							]
+					});
+			});
+			</script>
+	
+	
+	
+</head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="https://nilayrajderkar.github.io/">Nilay Rajderkar</a>
+	</div>
+	<nav>
+		
+		<a href="/">Home</a>
+		
+		<a href="/posts">All posts</a>
+		
+		<a href="/about">About</a>
+		
+		<a href="/tags">Tags</a>
+		
+		| <span id="dark-mode-toggle" onclick="toggleTheme()"></span>
+		<script src="https://nilayrajderkar.github.io/js/themetoggle.js"></script>
+		
+	</nav>
+</header>
+
+<main>
+	<article>
+		<div class="title">
+			<h1 class="title">SQL Window Functions (Basics)</h1>
+			<div class="meta">Posted on Dec 31, 2023</div>
+		</div>
+		
+
+		<section class="body">
+			<p><code>Understanding how SQL Window Functions Work</code></p>
+<ul>
+<li>Window functions are also aggregation functions</li>
+<li>For group by aggregation - one row is returned per group with overall aggregation on the entire group. However for window function - each row is returned back, and individual row information is used in the aggregation.</li>
+</ul>
+<p><em>OVER() is used to define a window - the 3 operations below are encapsulated in this OVER() clause</em></p>
+<p>Three Important operations -</p>
+<pre><code>Grouping - PARTITION BY used to define the group size
+Order - ORDER BY to sort and create a rolling expanding window
+RANGE/ROW - define window size, range-&gt;logical and row-&gt;physical restriction 
+</code></pre>
+<p>ORDER BY will order rows within their respective group. If ordering on a field, if field values replicate - they have the same priority (let&rsquo;s call this a subgroup)</p>
+<p>ORDER BY will also force the window to expand gradually (one subgroup at a time) within each group.</p>
+<p><code>ROW Window Function:</code></p>
+<ul>
+<li><strong>Syntax:</strong> OVER(ORDER BY column_name ROWS BETWEEN start AND end).</li>
+<li>Specifies a physical number of rows relative to the current row.</li>
+</ul>
+<p><code>RANGE Window Function:</code></p>
+<ul>
+<li><strong>Syntax:</strong> OVER(ORDER BY column_name RANGE BETWEEN start AND end).</li>
+<li>Specifies a logical range of values relative to the value of the current row (This is the order by clause)</li>
+</ul>
+<p>Lets go through each of the SQL commands below for better undestanding</p>
+<p><img src="/images/Screenshot%202023-12-31%20at%203.11.13%20PM.png" alt="Alt text">
+<img src="/images/Screenshot%202023-12-31%20at%203.11.39%20PM.png" alt="Alt text">
+<img src="/images/Screenshot%202023-12-31%20at%203.11.53%20PM.png" alt="Alt text">
+<img src="/images/Screenshot%202023-12-31%20at%203.12.17%20PM.png" alt="Alt text">
+<img src="/images/Screenshot%202023-12-31%20at%203.12.36%20PM.png" alt="Alt text">
+<img src="/images/Screenshot%202023-12-31%20at%203.13.25%20PM.png" alt="Alt text">
+<img src="/images/Screenshot%202023-12-31%20at%203.15.38%20PM.png" alt="Alt text">
+<img src="/images/Screenshot%202023-12-31%20at%203.15.49%20PM.png" alt="Alt text"></p>
+
+		</section>
+
+		<div class="post-tags">
+			
+			
+			
+		</div>
+		</article>
+</main>
+<footer>
+  <div style="display:flex"><a class="soc" href="https://github.com/nilayrajderkar/" rel="me" title="GitHub"><i data-feather="github"></i></a>
+    <a class="border"></a><a class="soc" href="https://twitter.com/nilaydown/" rel="me" title="Twitter"><i data-feather="twitter"></i></a>
+    <a class="border"></a></div>
+  <div class="footer-info">
+    2023  <a
+      href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
+  </div>
+</footer>
+
+
+<script>
+  feather.replace()
+</script></div>
+    </body>
+</html>
