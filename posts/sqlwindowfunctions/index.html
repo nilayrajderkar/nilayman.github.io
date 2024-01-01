@@ -127,15 +127,185 @@ RANGE/ROW - define window size, range-&gt;logical and row-&gt;physical restricti
 <li><strong>Syntax:</strong> OVER(ORDER BY column_name RANGE BETWEEN start AND end).</li>
 <li>Specifies a logical range of values relative to the value of the current row (This is the order by clause)</li>
 </ul>
-<p>Lets go through each of the SQL commands below for better undestanding</p>
-<p><img src="/images/Screenshot%202023-12-31%20at%203.11.13%20PM.png" alt="Alt text">
-<img src="/images/Screenshot%202023-12-31%20at%203.11.39%20PM.png" alt="Alt text">
-<img src="/images/Screenshot%202023-12-31%20at%203.11.53%20PM.png" alt="Alt text">
-<img src="/images/Screenshot%202023-12-31%20at%203.12.17%20PM.png" alt="Alt text">
-<img src="/images/Screenshot%202023-12-31%20at%203.12.36%20PM.png" alt="Alt text">
-<img src="/images/Screenshot%202023-12-31%20at%203.13.25%20PM.png" alt="Alt text">
-<img src="/images/Screenshot%202023-12-31%20at%203.15.38%20PM.png" alt="Alt text">
-<img src="/images/Screenshot%202023-12-31%20at%203.15.49%20PM.png" alt="Alt text"></p>
+<p>Lets create a sample table to try out window functions:</p>
+<p>Consider a table which has number of kms run on each day.
+Along with it is the number of the team that the athlete is a part of</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>select * from window_functions
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> day_no | value | team_no
+</span></span><span style="display:flex;"><span>--------+-------+---------
+</span></span><span style="display:flex;"><span>      1 |    10 |       1
+</span></span><span style="display:flex;"><span>      2 |    15 |       1
+</span></span><span style="display:flex;"><span>      3 |    20 |       2
+</span></span><span style="display:flex;"><span>      4 |    25 |       2
+</span></span><span style="display:flex;"><span>      5 |    30 |       3
+</span></span><span style="display:flex;"><span>      6 |    35 |       3
+</span></span><span style="display:flex;"><span>      7 |    40 |       4
+</span></span><span style="display:flex;"><span>      8 |    45 |       4
+</span></span><span style="display:flex;"><span>      9 |    50 |       5
+</span></span><span style="display:flex;"><span>     10 |    55 |       5
+</span></span><span style="display:flex;"><span>     11 |    60 |       1
+</span></span><span style="display:flex;"><span>     12 |    65 |       2
+</span></span><span style="display:flex;"><span>     13 |    70 |       3
+</span></span><span style="display:flex;"><span>     11 |    25 |       5
+</span></span><span style="display:flex;"><span>(14 rows)
+</span></span></code></pre></div><hr>
+<p>We use no grouping (partition) in the OVER clause, hence entire df is the group
+Observe that</p>
+<ul>
+<li><code>Each row is returned back, and individual row information is used in the aggregation</code></li>
+<li><code>Row order is altered after running the query</code></li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>postgres=# select *, sum(value) OVER() as sum_overall from window_functions;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> day_no | value | team_no | sum_overall
+</span></span><span style="display:flex;"><span>--------+-------+---------+-------------
+</span></span><span style="display:flex;"><span>      1 |    10 |       1 |         545
+</span></span><span style="display:flex;"><span>      2 |    15 |       1 |         545
+</span></span><span style="display:flex;"><span>      3 |    20 |       2 |         545
+</span></span><span style="display:flex;"><span>      4 |    25 |       2 |         545
+</span></span><span style="display:flex;"><span>      5 |    30 |       3 |         545
+</span></span><span style="display:flex;"><span>      6 |    35 |       3 |         545
+</span></span><span style="display:flex;"><span>      7 |    40 |       4 |         545
+</span></span><span style="display:flex;"><span>      8 |    45 |       4 |         545
+</span></span><span style="display:flex;"><span>      9 |    50 |       5 |         545
+</span></span><span style="display:flex;"><span>     10 |    55 |       5 |         545
+</span></span><span style="display:flex;"><span>     11 |    60 |       1 |         545
+</span></span><span style="display:flex;"><span>     12 |    65 |       2 |         545
+</span></span><span style="display:flex;"><span>     13 |    70 |       3 |         545
+</span></span><span style="display:flex;"><span>     11 |    25 |       5 |         545
+</span></span><span style="display:flex;"><span>(14 rows)
+</span></span></code></pre></div><hr>
+<p>Now lets define a window. We use grouping (partition) in the OVER clause, hence partitioned by team_no
+Hence, the sum per team is the value against each row.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>postgres=# select *, sum(value) OVER(partition by team_no)
+</span></span><span style="display:flex;"><span>as sum_per_team from window_functions;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> day_no | value | team_no | sum_per_team
+</span></span><span style="display:flex;"><span>--------+-------+---------+--------------
+</span></span><span style="display:flex;"><span>      2 |    15 |       1 |           85
+</span></span><span style="display:flex;"><span>      1 |    10 |       1 |           85
+</span></span><span style="display:flex;"><span>     11 |    60 |       1 |           85
+</span></span><span style="display:flex;"><span>     12 |    65 |       2 |          110
+</span></span><span style="display:flex;"><span>      4 |    25 |       2 |          110
+</span></span><span style="display:flex;"><span>      3 |    20 |       2 |          110
+</span></span><span style="display:flex;"><span>     13 |    70 |       3 |          135
+</span></span><span style="display:flex;"><span>      5 |    30 |       3 |          135
+</span></span><span style="display:flex;"><span>      6 |    35 |       3 |          135
+</span></span><span style="display:flex;"><span>      8 |    45 |       4 |           85
+</span></span><span style="display:flex;"><span>      7 |    40 |       4 |           85
+</span></span><span style="display:flex;"><span>     10 |    55 |       5 |          130
+</span></span><span style="display:flex;"><span>      9 |    50 |       5 |          130
+</span></span><span style="display:flex;"><span>     11 |    25 |       5 |          130
+</span></span><span style="display:flex;"><span>(14 rows)
+</span></span></code></pre></div><hr>
+<p>Let us use the order by clause now - Recalling that this does two things</p>
+<ul>
+<li>Sort window based on the field in the order by clause. If the sorting field
+value is same, priority is same and it is considered an equal subgroup</li>
+<li>Rolling expansion of the window</li>
+</ul>
+<p>This query orders by day no and expands window (rolling sum) based
+on the order by field - the day no
+Recall that no partition is used, so window here is the entire df</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>postgres=# select *, sum(value) OVER(order by day_no) as rolling_sum_complete
+</span></span><span style="display:flex;"><span>from window_functions;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> day_no | value | team_no | rolling_sum_complete
+</span></span><span style="display:flex;"><span>--------+-------+---------+----------------------
+</span></span><span style="display:flex;"><span>      1 |    10 |       1 |                   10
+</span></span><span style="display:flex;"><span>      2 |    15 |       1 |                   25
+</span></span><span style="display:flex;"><span>      3 |    20 |       2 |                   45
+</span></span><span style="display:flex;"><span>      4 |    25 |       2 |                   70
+</span></span><span style="display:flex;"><span>      5 |    30 |       3 |                  100
+</span></span><span style="display:flex;"><span>      6 |    35 |       3 |                  135
+</span></span><span style="display:flex;"><span>      7 |    40 |       4 |                  175
+</span></span><span style="display:flex;"><span>      8 |    45 |       4 |                  220
+</span></span><span style="display:flex;"><span>      9 |    50 |       5 |                  270
+</span></span><span style="display:flex;"><span>     10 |    55 |       5 |                  325
+</span></span><span style="display:flex;"><span>     11 |    60 |       1 |                  410
+</span></span><span style="display:flex;"><span>     11 |    25 |       5 |                  410
+</span></span><span style="display:flex;"><span>     12 |    65 |       2 |                  475
+</span></span><span style="display:flex;"><span>     13 |    70 |       3 |                  545
+</span></span><span style="display:flex;"><span>(14 rows)
+</span></span></code></pre></div><hr>
+<p>Let us add a partition as well. We use order by - this orders by day no and expands window (rolling sum) based
+on the order by field - the day no
+Partition/Window here is the team_no</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>postgres=# select *, sum(value) OVER(partition by team_no order by day_no)
+</span></span><span style="display:flex;"><span>as rolling_sum from window_functions;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> day_no | value | team_no | rolling_sum
+</span></span><span style="display:flex;"><span>--------+-------+---------+-------------
+</span></span><span style="display:flex;"><span>      1 |    10 |       1 |          10
+</span></span><span style="display:flex;"><span>      2 |    15 |       1 |          25
+</span></span><span style="display:flex;"><span>     11 |    60 |       1 |          85
+</span></span><span style="display:flex;"><span>      3 |    20 |       2 |          20
+</span></span><span style="display:flex;"><span>      4 |    25 |       2 |          45
+</span></span><span style="display:flex;"><span>     12 |    65 |       2 |         110
+</span></span><span style="display:flex;"><span>      5 |    30 |       3 |          30
+</span></span><span style="display:flex;"><span>      6 |    35 |       3 |          65
+</span></span><span style="display:flex;"><span>     13 |    70 |       3 |         135
+</span></span><span style="display:flex;"><span>      7 |    40 |       4 |          40
+</span></span><span style="display:flex;"><span>      8 |    45 |       4 |          85
+</span></span><span style="display:flex;"><span>      9 |    50 |       5 |          50
+</span></span><span style="display:flex;"><span>     10 |    55 |       5 |         105
+</span></span><span style="display:flex;"><span>     11 |    25 |       5 |         130
+</span></span><span style="display:flex;"><span>(14 rows)
+</span></span></code></pre></div><hr>
+<p>Trying the RANGE window function
+We partition on team<em>no, order on day_no.
+_Since it is RANGE window, it is a logical window restriction on day number.</em>
+The query checks for sum in the last 2 days for each team.
+(Observe team 1 on day 11 has value 60, not sum of last 2 rows which is 75)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>postgres=# select *, sum(value) OVER(partition by team_no order by day_no
+</span></span><span style="display:flex;"><span>range between 1 preceding and current row) as logical_sum_2rows from window_functions;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> day_no | value | team_no | logical_sum_2rows
+</span></span><span style="display:flex;"><span>--------+-------+---------+-------------------
+</span></span><span style="display:flex;"><span>      1 |    10 |       1 |                10
+</span></span><span style="display:flex;"><span>      2 |    15 |       1 |                25
+</span></span><span style="display:flex;"><span>     11 |    60 |       1 |                60
+</span></span><span style="display:flex;"><span>      3 |    20 |       2 |                20
+</span></span><span style="display:flex;"><span>      4 |    25 |       2 |                45
+</span></span><span style="display:flex;"><span>     12 |    65 |       2 |                65
+</span></span><span style="display:flex;"><span>      5 |    30 |       3 |                30
+</span></span><span style="display:flex;"><span>      6 |    35 |       3 |                65
+</span></span><span style="display:flex;"><span>     13 |    70 |       3 |                70
+</span></span><span style="display:flex;"><span>      7 |    40 |       4 |                40
+</span></span><span style="display:flex;"><span>      8 |    45 |       4 |                85
+</span></span><span style="display:flex;"><span>      9 |    50 |       5 |                50
+</span></span><span style="display:flex;"><span>     10 |    55 |       5 |               105
+</span></span><span style="display:flex;"><span>     11 |    25 |       5 |                80
+</span></span><span style="display:flex;"><span>(14 rows)
+</span></span></code></pre></div><hr>
+<p>Trying the ROW window function
+We partition on team<em>no, order on day_no.
+_Since it is ROW window, it is a physical window restriction on day number.</em>
+The query checks for sum in the last 2 rows for each team.
+Hence team 1 on day 11 has value 75</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>postgres=# select *, sum(value) OVER(partition by team_no order by day_no
+</span></span><span style="display:flex;"><span>ROWS between 1 preceding and current row) as physical_sum_2rows from window_functions;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span> day_no | value | team_no | physical_sum_2rows
+</span></span><span style="display:flex;"><span>--------+-------+---------+--------------------
+</span></span><span style="display:flex;"><span>      1 |    10 |       1 |                 10
+</span></span><span style="display:flex;"><span>      2 |    15 |       1 |                 25
+</span></span><span style="display:flex;"><span>     11 |    60 |       1 |                 75
+</span></span><span style="display:flex;"><span>      3 |    20 |       2 |                 20
+</span></span><span style="display:flex;"><span>      4 |    25 |       2 |                 45
+</span></span><span style="display:flex;"><span>     12 |    65 |       2 |                 90
+</span></span><span style="display:flex;"><span>      5 |    30 |       3 |                 30
+</span></span><span style="display:flex;"><span>      6 |    35 |       3 |                 65
+</span></span><span style="display:flex;"><span>     13 |    70 |       3 |                105
+</span></span><span style="display:flex;"><span>      7 |    40 |       4 |                 40
+</span></span><span style="display:flex;"><span>      8 |    45 |       4 |                 85
+</span></span><span style="display:flex;"><span>      9 |    50 |       5 |                 50
+</span></span><span style="display:flex;"><span>     10 |    55 |       5 |                105
+</span></span><span style="display:flex;"><span>     11 |    25 |       5 |                 80
+</span></span><span style="display:flex;"><span>(14 rows)
+</span></span></code></pre></div><p>A good reference blog with gifs, provides great understanding: <a href="https://medium.com/learning-sql/sql-window-function-visualized-fff1927f00f2">https://medium.com/learning-sql/sql-window-function-visualized-fff1927f00f2</a></p>
 
 		</section>
 
@@ -151,7 +321,7 @@ RANGE/ROW - define window size, range-&gt;logical and row-&gt;physical restricti
     <a class="border"></a><a class="soc" href="https://twitter.com/nilaydown/" rel="me" title="Twitter"><i data-feather="twitter"></i></a>
     <a class="border"></a></div>
   <div class="footer-info">
-    2023  <a
+    2024  <a
       href="https://github.com/athul/archie">Archie Theme</a> | Built with <a href="https://gohugo.io">Hugo</a>
   </div>
 </footer>
